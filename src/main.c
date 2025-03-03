@@ -15,7 +15,7 @@
  *
  ******************************************************************************
  */
-
+//Basic includes
 #include "stm32wlxx.h"
 #include "stm32wlxx_hal_conf.h"
 #include "stm32wlxx_hal.h"
@@ -24,9 +24,19 @@
 #include "stm32wlxx_hal_pwr.h"
 #include "stm32wlxx_hal_pwr_ex.h"
 
+//STM32WL library includes
+#include "STM32WL_clocks.h"
+
+//Function prototypes
+void Debbug_Toggle(uint32_t cycles);
+void SysTick_Handler(void);
+
 
 int main(void){
 	HAL_Init();
+
+	HSI16_init();
+	//HSE32_CPU_init();
 
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
 	__HAL_RCC_GPIOA_CLK_ENABLE();
@@ -40,11 +50,19 @@ int main(void){
 //	HAL_SUBGHZ_Init(hsubghz);
 
 	while(1){
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-		HAL_Delay(500);
+		//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+		//HAL_Delay(500);
+
+		Debbug_Toggle(1000000);
 	}
 }
 
+void Debbug_Toggle(uint32_t cycles){
+    for(uint32_t i = 0; i < cycles; i++)
+        __NOP(); // no operations
+
+    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+}
 
 void SysTick_Handler(void){
   HAL_IncTick();

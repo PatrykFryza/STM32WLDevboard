@@ -51,6 +51,7 @@ set (PROJECT_SOURCES
 	src/syscalls.c
 	src/sysmem.c
 	src/system_stm32wlxx.c
+	src/STM32WL_clocks.c
 	libs/HAL/src/stm32wlxx_hal_cortex.c
 	libs/HAL/src/stm32wlxx_hal_dma_ex.c
 	libs/HAL/src/stm32wlxx_hal_exti.c
