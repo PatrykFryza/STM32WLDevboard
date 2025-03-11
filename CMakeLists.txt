@@ -48,10 +48,11 @@ set (PROJECT_SOURCES
 	# LIST SOURCE FILES HERE
 	Startup/startup_stm32wl55ccux.s
 	src/main.c
-	src/syscalls.c
-	src/sysmem.c
-	src/system_stm32wlxx.c
-	src/STM32WL_clocks.c
+	src/rfl_clocks.c
+	src/rfl_usart.c
+	libs/CMSIS/syscalls.c
+	libs/CMSIS/sysmem.c
+	libs/CMSIS/system_stm32wlxx.c
 	libs/HAL/src/stm32wlxx_hal_cortex.c
 	libs/HAL/src/stm32wlxx_hal_dma_ex.c
 	libs/HAL/src/stm32wlxx_hal_exti.c

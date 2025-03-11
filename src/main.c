@@ -24,7 +24,10 @@
 #include "stm32wlxx_hal_pwr.h"
 #include "stm32wlxx_hal_pwr_ex.h"
 
-#include "STM32WL_clocks.h"
+#include <stdio.h>
+
+#include "rfl_clocks.h"
+#include "rfl_usart.h"
 
 SUBGHZ_HandleTypeDef subghz_handler;
 uint8_t payload[64] = "Hello World!";
@@ -48,10 +51,16 @@ void Debbug_Toggle(uint32_t cycles){
 
 int main(void){
 	HAL_Init();
-//	HSE32_CPU_init();
+
+	//Clock init
 //	HSI16_init();
-//	//HSE32_CPU_init();
-//
+	HSI_PLL48_init();
+//	HSE32_CPU_init();
+
+	USART1_Init();
+	printf("System start - usart init check\r\n"); //115200
+
+
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 
