@@ -57,6 +57,13 @@ void HSI_PLL48_init(void){
 	SystemCoreClockUpdate();
 }
 
+void HSE32_Radio_init(){
+	RCC->CR |= RCC_CR_HSEBYPPWR; // PB0 as Vddtcxo
+	RCC->CR |= RCC_CR_HSEON; // HSE32 for CPU enabled
+
+	while((RCC->CR & RCC_CR_HSERDY) != 0); // wait for ready
+}
+
 void HSE32_CPU_init(){
 	RCC->CR |= RCC_CR_HSEBYPPWR; // PB0 as Vddtcxo
 	RCC->CR |= RCC_CR_HSEON; // HSE32 for CPU enabled
@@ -64,4 +71,6 @@ void HSE32_CPU_init(){
 	while((RCC->CR & RCC_CR_HSERDY) != 0); // wait for ready
 	RCC->CFGR &= ~RCC_CFGR_SW; // clear SW[0:1]
 	RCC->CFGR |= RCC_CFGR_SW_1; // set HSE32 as system clock
+
+	SystemCoreClock = 32000000;
 }

@@ -28,25 +28,15 @@
 
 #include "rfl_clocks.h"
 #include "rfl_usart.h"
+#include "rfl_gpio.h"
 
-SUBGHZ_HandleTypeDef subghz_handler;
-uint8_t payload[64] = "Hello World!";
-
-uint8_t RadioParam[8]  = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-uint8_t interrupts[3] = {0};
-
-
-void Error_Handler(){
-	while(1){
-		HAL_Delay(1);
-	}
-}
+#include "hal_based_subghz.h"
 
 void Debbug_Toggle(uint32_t cycles){
     for(uint32_t i = 0; i < cycles; i++)
         __NOP(); // no operations
 
-    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+    led_state(toggle);
 }
 
 int main(void){
@@ -57,200 +47,22 @@ int main(void){
 	HSI_PLL48_init();
 //	HSE32_CPU_init();
 
-	USART1_Init();
-	printf("System start - usart init check\r\n"); //115200
+	//Green led init
+	led_init();
 
+	//USART init
+	USART1_Init(); //115200
+	printf("System start - usart init check\r\n");
 
-	GPIO_InitTypeDef GPIO_InitStruct = {0};
-	__HAL_RCC_GPIOA_CLK_ENABLE();
-
-	GPIO_InitStruct.Pin = GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_RESET);
-
-	RCC->CSR |= RCC_CSR_RFRST;
-	HAL_Delay(5);
-	RCC->CSR &= ~RCC_CSR_RFRST;
-	while(RCC->CSR & RCC_CSR_RFRSTF);
-
-	subghz_handler.Init.BaudratePrescaler = SUBGHZSPI_BAUDRATEPRESCALER_8;
-	uint32_t counter = 0;
-	uint8_t buffer[32] = {0};
-	__HAL_RCC_SUBGHZSPI_CLK_ENABLE();
-
-	/* SUBGHZ interrupt Init */
-	HAL_NVIC_SetPriority(SUBGHZ_Radio_IRQn, 0, 0);
-	HAL_NVIC_EnableIRQ(SUBGHZ_Radio_IRQn);
-	if(HAL_SUBGHZ_Init(&subghz_handler) == HAL_OK){
-		counter += 5;
-	}
-	uint8_t buf[4];
-	buf[0] = 0x01 & 0x07;
-	buf[1] = ( uint8_t )( ( (0x01 << 6) >> 16 ) & 0xFF );
-	buf[2] = ( uint8_t )( ( (0x01 << 6) >> 8 ) & 0xFF );
-	buf[3] = ( uint8_t )( (0x01 << 6) & 0xFF );
-
-	HAL_SUBGHZ_ExecSetCmd(&subghz_handler, RADIO_SET_TCXOMODE, buf, 4);
-	// 1. Set Buffer Address
-	RadioParam[0] = 0x80U; // Tx base address
-	RadioParam[1] = 0x00U; // Rx base address
-
-	if (HAL_SUBGHZ_ExecSetCmd(&subghz_handler, RADIO_SET_BUFFERBASEADDRESS, RadioParam, 2) != HAL_OK)
-	{
-		Error_Handler();
-	}
-
-
-	// 2. Write Payload to Buffer
-	if (HAL_SUBGHZ_WriteBuffer(&subghz_handler, 0x80U, payload, sizeof(payload)) != HAL_OK)
-	{
-		Error_Handler();
-	}
-
-
-	// 3. Set Packet Type
-	RadioParam[0] = 0x01U; //LoRa packet type
-
-	if (HAL_SUBGHZ_ExecSetCmd(&subghz_handler, RADIO_SET_PACKETTYPE, RadioParam, 1) != HAL_OK)
-	{
-		Error_Handler();
-	}
-
-
-	// 4. Set Frame Format
-	RadioParam[0] = 0x00U; // PbLength MSB - 12-symbol-long preamble sequence
-	RadioParam[1] = 0x0CU; // PbLength LSB - 12-symbol-long preamble sequence
-	RadioParam[2] = 0x00U; // explicit header type
-	RadioParam[3] = 0x40U; // 64 bit packet length.
-	RadioParam[4] = 0x01U; // CRC enabled
-	RadioParam[5] = 0x00U; // standard IQ setup
-
-	if (HAL_SUBGHZ_ExecSetCmd(&subghz_handler, RADIO_SET_PACKETPARAMS, RadioParam, 6) != HAL_OK)
-	{
-		Error_Handler();
-	}
-
-
-//	// 5. Define synchronisation word
-//	RadioParam[0] = 0x14U; // LoRa private network
-//	RadioParam[1] = 0x24U; // LoRa private network
-//
-//	if (HAL_SUBGHZ_WriteRegisters(&subghz_handler, (uint16_t) 0x740, RadioParam, 2) != HAL_OK)
-//	{
-//		Error_Handler();
-//	}
-
-
-	// 6. Define RF Frequency
-	RadioParam[0] = 0x33U; //RF frequency - 868000000Hz
-	RadioParam[1] = 0xBCU; //RF frequency - 868000000Hz
-	RadioParam[2] = 0xA1U; //RF frequency - 868000000Hz
-	RadioParam[3] = 0x00U; //RF frequency - 868000000Hz
-
-	if (HAL_SUBGHZ_ExecSetCmd(&subghz_handler, RADIO_SET_RFFREQUENCY, RadioParam, 4) != HAL_OK)
-	{
-		Error_Handler();
-	}
-
-
-	// 7. Set PA Config
-	RadioParam[0] = 0x04U; // PaDutyCycle
-	RadioParam[1] = 0x07U; // HpMax
-	RadioParam[2] = 0x00U; // HP PA selected
-	RadioParam[3] = 0x01U; // predefined in RM0461 and RM0453
-
-	if (HAL_SUBGHZ_ExecSetCmd(&subghz_handler, RADIO_SET_PACONFIG, RadioParam, 4) != HAL_OK)
-	{
-		Error_Handler();
-	}
-
-
-	// 8.  Set Tx Parameters
-	RadioParam[0] = 0x16U; // Power - +22dB
-	RadioParam[1] = 0x04U; // RampTime - 200us
-
-	if (HAL_SUBGHZ_ExecSetCmd(&subghz_handler, RADIO_SET_TXPARAMS, RadioParam, 2) != HAL_OK)
-	{
-		Error_Handler();
-	}
-
-
-	// 9. Set Modulation parameter
-	RadioParam[0] = 0x07U; // SF (Spreading factor) - 7 (default)
-	RadioParam[1] = 0x09U; // BW (Bandwidth) - 20.83kHz
-	RadioParam[2] = 0x01U; // CR (Forward error correction coding rate) - 4/5
-	RadioParam[3] = 0x00U; // LDRO (Low data rate optimization) - off
-
-	if (HAL_SUBGHZ_ExecSetCmd(&subghz_handler, RADIO_SET_MODULATIONPARAMS, RadioParam, 4) != HAL_OK)
-	{
-		Error_Handler();
-	}
-
-
-	// 10. Configure interrupts
-	RadioParam[0] = 0x02U; // IRQ Mask MSB - Timeout interrupt
-	RadioParam[1] = 0x01U; // IRQ Mask LSB - Tx done interrupt
-	RadioParam[2] = 0x00U; // IRQ1 Line Mask MSB
-	RadioParam[3] = 0x01U; // IRQ1 Line Mask LSB - Tx done interrupt on IRQ line 1
-	RadioParam[4] = 0x01U; // IRQ2 Line Mask MSB - Timeout interrupt on IRQ line 2
-	RadioParam[5] = 0x00U; // IRQ2 Line Mask LSB
-	RadioParam[6] = 0x00U; // IRQ3 Line Mask MSB
-	RadioParam[7] = 0x00U; // IRQ3 Line Mask LSB
-
-	if (HAL_SUBGHZ_ExecSetCmd(&subghz_handler, RADIO_CFG_DIOIRQ, RadioParam, 8) != HAL_OK)
-	{
-		Error_Handler();
-	}
-
-
-	// 10.1 Read Interrupts
-	if (HAL_SUBGHZ_ExecGetCmd(&subghz_handler, RADIO_GET_IRQSTATUS, interrupts, 3) != HAL_OK)
-	{
-		Error_Handler();
-	}
-
-	// 11. Set Tx
-	RadioParam[0] = 0x09U; // Timeout
-	RadioParam[1] = 0xC4U; // Timeout
-	RadioParam[2] = 0x00U; // Timeout
-
-	if (HAL_SUBGHZ_ExecSetCmd(&subghz_handler, RADIO_SET_TX, RadioParam, 3) != HAL_OK)
-	{
-		Error_Handler();
-	}
-
-	HAL_Delay(500);
-	HAL_SUBGHZ_ExecGetCmd(&subghz_handler, RADIO_GET_STATUS, buffer, 2);
-
-//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, GPIO_PIN_RESET);
-//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_SET);
-//		RadioParam[0] = 0xFFU;
-//		RadioParam[1] = 0xFFU;
-//		RadioParam[2] = 0xFFU;
-//		if (HAL_SUBGHZ_ExecSetCmd(&subghz_handler, RADIO_SET_RX, RadioParam, 3) != HAL_OK)
-//		{
-//			Error_Handler();
-//		}
-//		HAL_Delay(500);
-//		HAL_SUBGHZ_ExecGetCmd(&subghz_handler, RADIO_GET_STATUS, buffer, 2);
+	//Radio init
+	subghz_init();
+	//subghz_init_rx();
+	subghz_init_tx();
 
 	while(1){
-//		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-//		HAL_Delay(500);
-
-		Debbug_Toggle(1000000);
+		Debbug_Toggle(10000);
 	}
+
+
 }
 
-void SUBGHZ_Radio_IRQHandler(void){
-  HAL_SUBGHZ_IRQHandler(&subghz_handler);
-}
-
-void SysTick_Handler(void){
-  HAL_IncTick();
-}

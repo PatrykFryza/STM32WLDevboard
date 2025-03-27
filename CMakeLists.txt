@@ -48,8 +48,14 @@ set (PROJECT_SOURCES
 	# LIST SOURCE FILES HERE
 	Startup/startup_stm32wl55ccux.s
 	src/main.c
+	src/handlers.c
+	
 	src/rfl_clocks.c
 	src/rfl_usart.c
+	src/rfl_gpio.c
+	
+	src/hal_based_subghz.c
+	
 	libs/CMSIS/syscalls.c
 	libs/CMSIS/sysmem.c
 	libs/CMSIS/system_stm32wlxx.c
