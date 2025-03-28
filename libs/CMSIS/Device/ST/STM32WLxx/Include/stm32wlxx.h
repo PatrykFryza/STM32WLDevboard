@@ -95,6 +95,10 @@
 /** @addtogroup Device_Included
   * @{
   */
+#ifndef STM32WL55xx
+#define STM32WL55xx
+#endif
+
 
 #if defined(STM32WL55xx)
   #include "stm32wl55xx.h"

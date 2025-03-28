@@ -53,6 +53,7 @@ set (PROJECT_SOURCES
 	src/rfl_clocks.c
 	src/rfl_usart.c
 	src/rfl_gpio.c
+	src/rfl_subghz.c
 	
 	src/hal_based_subghz.c
 	

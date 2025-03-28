@@ -14,6 +14,9 @@
 
 #include "rfl_clocks.h"
 #include "rfl_gpio.h"
+#include "rfl_subghz.h"
+
+#include <stdio.h>
 
 static void Subghz_Error_Handler(void){
 	while(1){
@@ -57,30 +60,35 @@ void subghz_rfmode(RFMode set_rf_mode){
 }
 
 void subghz_init(void){
-	//turn on tcxo for radio
-	HSE32_Radio_init();
+//	//turn on tcxo for radio
+//	HSE32_Radio_init();
+//
+//
+//	//initialize gpio for rfswitch
+//	rfswitch_init();
+//
+//	//radio reset
+//	RCC->CSR |= RCC_CSR_RFRST;
+//	HAL_Delay(5);
+//	RCC->CSR &= ~RCC_CSR_RFRST;
+//	while(RCC->CSR & RCC_CSR_RFRSTF); //wait for reset flag clear
+//
+//	//subghz spi init
 
-	//initialize gpio for rfswitch
-	rfswitch_init();
-
-	//radio reset
-	RCC->CSR |= RCC_CSR_RFRST;
-	HAL_Delay(5);
-	RCC->CSR &= ~RCC_CSR_RFRST;
-	while(RCC->CSR & RCC_CSR_RFRSTF); //wait for reset flag clear
-
-	//subghz spi init
+//	__HAL_RCC_SUBGHZSPI_CLK_ENABLE();
+//
+//	/* SUBGHZ interrupt Init */
+//	HAL_NVIC_SetPriority(SUBGHZ_Radio_IRQn, 0, 0);
+//	HAL_NVIC_EnableIRQ(SUBGHZ_Radio_IRQn);
+	rfl_radio_init();
 	subghz_handler.Init.BaudratePrescaler = SUBGHZSPI_BAUDRATEPRESCALER_8;
-	__HAL_RCC_SUBGHZSPI_CLK_ENABLE();
-
-	/* SUBGHZ interrupt Init */
-	HAL_NVIC_SetPriority(SUBGHZ_Radio_IRQn, 0, 0);
-	HAL_NVIC_EnableIRQ(SUBGHZ_Radio_IRQn);
-	if(HAL_SUBGHZ_Init(&subghz_handler) != HAL_OK)
-	{
-		Subghz_Error_Handler();
-	}
-
+//	if(HAL_SUBGHZ_Init(&subghz_handler) != HAL_OK)
+//	{
+//		Subghz_Error_Handler();
+//	}
+	subghz_handler.DeepSleep = 1U;
+	subghz_handler.ErrorCode = 0U;
+	subghz_handler.State = HAL_SUBGHZ_STATE_READY;
 	static uint8_t RadioParam[4];
 
 	//Set tcxo
@@ -333,6 +341,9 @@ void subghz_init_rx(void){
 	{
 		Subghz_Error_Handler();
 	}
+
+	uint8_t buffer[3] = {0};
+	HAL_SUBGHZ_ExecGetCmd(&subghz_handler, RADIO_GET_STATUS, buffer, 2);
 }
 
 void subghz_clear_irq(void){
@@ -344,8 +355,19 @@ void subghz_clear_irq(void){
 	}
 }
 
+void subghz_receive(){
+	static uint8_t read_payload[64] = {0};
+	if (HAL_SUBGHZ_ReadBuffer(&subghz_handler, 0x00U, read_payload, sizeof(read_payload)) != HAL_OK)
+	{
+		Subghz_Error_Handler();
+	}
+	printf("Received: %s\r\n", read_payload);
+}
+
+
 void subghz_handle_irq(void){
 	HAL_SUBGHZ_IRQHandler(&subghz_handler);
+	subghz_receive();
 }
 
 

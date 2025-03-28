@@ -56,11 +56,11 @@ int main(void){
 
 	//Radio init
 	subghz_init();
-	//subghz_init_rx();
-	subghz_init_tx();
+	subghz_init_rx();
+//	subghz_init_tx();
 
 	while(1){
-		Debbug_Toggle(10000);
+		Debbug_Toggle(1000000);
 	}
 
 
