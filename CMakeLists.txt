@@ -53,27 +53,27 @@ set (PROJECT_SOURCES
 	src/rfl_clocks.c
 	src/rfl_usart.c
 	src/rfl_gpio.c
+	src/rfl_subghz_spi.c
 	src/rfl_subghz.c
 	
-	src/hal_based_subghz.c
 	
 	libs/CMSIS/syscalls.c
 	libs/CMSIS/sysmem.c
 	libs/CMSIS/system_stm32wlxx.c
-	libs/HAL/src/stm32wlxx_hal_cortex.c
-	libs/HAL/src/stm32wlxx_hal_dma_ex.c
-	libs/HAL/src/stm32wlxx_hal_exti.c
-	libs/HAL/src/stm32wlxx_hal_flash_ex.c
-	libs/HAL/src/stm32wlxx_hal_flash.c
-	libs/HAL/src/stm32wlxx_hal_gpio.c
-	libs/HAL/src/stm32wlxx_hal_pwr_ex.c
-	libs/HAL/src/stm32wlxx_hal_pwr.c
-	libs/HAL/src/stm32wlxx_hal_rcc_ex.c
-	libs/HAL/src/stm32wlxx_hal_rcc.c
-	libs/HAL/src/stm32wlxx_hal_spi.c
-	libs/HAL/src/stm32wlxx_hal_subghz.c
-	libs/HAL/src/stm32wlxx_hal.c
-	libs/HAL/src/stm32wlxx_ll_spi.c
+	#libs/HAL/src/stm32wlxx_hal_cortex.c
+	#libs/HAL/src/stm32wlxx_hal_dma_ex.c
+	#libs/HAL/src/stm32wlxx_hal_exti.c
+	#libs/HAL/src/stm32wlxx_hal_flash_ex.c
+	#libs/HAL/src/stm32wlxx_hal_flash.c
+	#libs/HAL/src/stm32wlxx_hal_gpio.c
+	#libs/HAL/src/stm32wlxx_hal_pwr_ex.c
+	#libs/HAL/src/stm32wlxx_hal_pwr.c
+	#libs/HAL/src/stm32wlxx_hal_rcc_ex.c
+	#libs/HAL/src/stm32wlxx_hal_rcc.c
+	#libs/HAL/src/stm32wlxx_hal_spi.c
+	#libs/HAL/src/stm32wlxx_hal_subghz.c
+	#libs/HAL/src/stm32wlxx_hal.c
+	#libs/HAL/src/stm32wlxx_ll_spi.c
 
 	)
 

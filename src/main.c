@@ -17,12 +17,6 @@
  */
 //Basic includes
 #include "stm32wlxx.h"
-#include "stm32wlxx_hal_conf.h"
-#include "stm32wlxx_hal.h"
-#include "stm32wlxx_hal_gpio.h"
-#include "stm32wlxx_hal_rcc.h"
-#include "stm32wlxx_hal_pwr.h"
-#include "stm32wlxx_hal_pwr_ex.h"
 
 #include <stdio.h>
 
@@ -30,7 +24,8 @@
 #include "rfl_usart.h"
 #include "rfl_gpio.h"
 
-#include "hal_based_subghz.h"
+//#include "hal_based_subghz.h"
+#include "rfl_subghz.h"
 
 void Debbug_Toggle(uint32_t cycles){
     for(uint32_t i = 0; i < cycles; i++)
@@ -40,8 +35,6 @@ void Debbug_Toggle(uint32_t cycles){
 }
 
 int main(void){
-	HAL_Init();
-
 	//Clock init
 //	HSI16_init();
 	HSI_PLL48_init();
@@ -60,7 +53,7 @@ int main(void){
 //	subghz_init_tx();
 
 	while(1){
-		Debbug_Toggle(1000000);
+		Debbug_Toggle(2000000);
 	}
 
 

@@ -9,7 +9,7 @@
 
 #include "stm32wlxx.h"
 #include "stm32wlxx_hal.h"
-#include "hal_based_subghz.h"
+#include "rfl_subghz.h"
 
 void SUBGHZ_Radio_IRQHandler(void){
 	subghz_clear_irq();
@@ -17,7 +17,7 @@ void SUBGHZ_Radio_IRQHandler(void){
 }
 
 void SysTick_Handler(void){
-	HAL_IncTick();
+//	HAL_IncTick();
 }
 
 void NMI_Handler(void){
