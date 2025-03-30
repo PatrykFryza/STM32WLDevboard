@@ -8,11 +8,13 @@
 #ifndef INC_RFL_SUBGHZ_H_
 #define INC_RFL_SUBGHZ_H_
 
-void subghz_init(void);
+void rfl_subghz_init(void);
 
-void subghz_init(void);
-void subghz_init_tx(void);
-void subghz_init_rx(void);
+void rfl_subghz_init(void);
+void rfl_subghz_initTx(void);
+void rfl_subghz_initRx(void);
+void rfl_subghz_transmit(uint8_t payload[64]);
+void rfl_subghz_setRxContinous(void);
 
 void subghz_clear_irq(void);
 

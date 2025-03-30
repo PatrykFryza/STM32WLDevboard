@@ -60,20 +60,6 @@ set (PROJECT_SOURCES
 	libs/CMSIS/syscalls.c
 	libs/CMSIS/sysmem.c
 	libs/CMSIS/system_stm32wlxx.c
-	#libs/HAL/src/stm32wlxx_hal_cortex.c
-	#libs/HAL/src/stm32wlxx_hal_dma_ex.c
-	#libs/HAL/src/stm32wlxx_hal_exti.c
-	#libs/HAL/src/stm32wlxx_hal_flash_ex.c
-	#libs/HAL/src/stm32wlxx_hal_flash.c
-	#libs/HAL/src/stm32wlxx_hal_gpio.c
-	#libs/HAL/src/stm32wlxx_hal_pwr_ex.c
-	#libs/HAL/src/stm32wlxx_hal_pwr.c
-	#libs/HAL/src/stm32wlxx_hal_rcc_ex.c
-	#libs/HAL/src/stm32wlxx_hal_rcc.c
-	#libs/HAL/src/stm32wlxx_hal_spi.c
-	#libs/HAL/src/stm32wlxx_hal_subghz.c
-	#libs/HAL/src/stm32wlxx_hal.c
-	#libs/HAL/src/stm32wlxx_ll_spi.c
 
 	)
 
@@ -87,8 +73,6 @@ set (PROJECT_INCLUDES
 	inc/
 	libs/CMSIS/Include/
 	libs/CMSIS/Device/ST/STM32WLxx/Include
-	libs/HAL/inc
-	libs/HAL/inc/Legacy
 	
     )
 

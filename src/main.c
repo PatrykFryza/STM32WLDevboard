@@ -48,12 +48,17 @@ int main(void){
 	printf("System start - usart init check\r\n");
 
 	//Radio init
-	subghz_init();
-	subghz_init_rx();
-//	subghz_init_tx();
+	rfl_subghz_init();
+	rfl_subghz_initRx();
+	uint8_t payload[64] = "MEGA GIGA MASZT 5G\r\n";
+	rfl_subghz_transmit(payload);
+	Debbug_Toggle(10000000);
+	rfl_subghz_setRxContinous();
+//	rfl_subghz_initTx();
 
 	while(1){
-		Debbug_Toggle(2000000);
+		Debbug_Toggle(20000000);
+
 	}
 
 

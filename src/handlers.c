@@ -8,7 +8,6 @@
 #include "handlers.h"
 
 #include "stm32wlxx.h"
-#include "stm32wlxx_hal.h"
 #include "rfl_subghz.h"
 
 void SUBGHZ_Radio_IRQHandler(void){
