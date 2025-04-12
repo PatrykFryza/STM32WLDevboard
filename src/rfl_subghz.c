@@ -11,28 +11,11 @@
 #include "rfl_gpio.h"
 #include "rfl_subghz_spi.h"
 
-
 #include <stdio.h>
 
-typedef enum {
-	TX,
-	RX,
-} RFMode;
 
-typedef enum {
-	//LSB
-    IRQ_TX_DONE = 0,           // 0: Packet transmission finished
-    IRQ_RX_DONE = 1,           // 1: Packet reception finished
-    IRQ_PREAMBLE_DETECTED = 2, // 2: Preamble detected
-    IRQ_SYNC_DETECTED = 3,     // 3: Synchronization word valid
-    IRQ_HEADER_VALID = 4,      // 4: Header valid
-    IRQ_HEADER_ERR = 5,        // 5: Header CRC error
-    IRQ_ERR = 6,               // 6: General error (preamble, syncword, address, CRC, length) / CRC error (LoRa)
-    IRQ_CAD_DONE = 7,          // 7: Channel activity detection finished
-	//MSB
-    IRQ_CAD_DETECTED = 0,      // 8: Channel activity detected
-    IRQ_TIMEOUT = 1,           // 9: RX or TX timeout
-} IRQSource;
+
+
 
 
 void subghz_clear_irq(void){
@@ -51,6 +34,41 @@ void rfl_subghz_rfmode(RFMode set_rf_mode){
 	case RX:
 		RFR_state(reset);
 		RFT_state(set);
+		break;
+	}
+}
+
+
+void rfl_subghz_setPower(RFTxPower power){
+	uint8_t RadioParam[4];
+	switch(power){
+	case Tx22dBm:
+		RadioParam[0] = 0x04U; // PaDutyCycle
+		RadioParam[1] = 0x07U; // HpMax
+		RadioParam[2] = 0x00U; // HP PA selected
+		RadioParam[3] = 0x01U; // predefined in RM0461 and RM0453
+		subghz_spi_setCmd(RADIO_SET_PACONFIG, RadioParam, 4);
+		break;
+	case Tx20dBm:
+		RadioParam[0] = 0x03U; // PaDutyCycle
+		RadioParam[1] = 0x05U; // HpMax
+		RadioParam[2] = 0x00U; // HP PA selected
+		RadioParam[3] = 0x01U; // predefined in RM0461 and RM0453
+		subghz_spi_setCmd(RADIO_SET_PACONFIG, RadioParam, 4);
+		break;
+	case Tx17dBm:
+		RadioParam[0] = 0x02U; // PaDutyCycle
+		RadioParam[1] = 0x03U; // HpMax
+		RadioParam[2] = 0x00U; // HP PA selected
+		RadioParam[3] = 0x01U; // predefined in RM0461 and RM0453
+		subghz_spi_setCmd(RADIO_SET_PACONFIG, RadioParam, 4);
+		break;
+	case Tx14dBm:
+		RadioParam[0] = 0x02U; // PaDutyCycle
+		RadioParam[1] = 0x02U; // HpMax
+		RadioParam[2] = 0x00U; // HP PA selected
+		RadioParam[3] = 0x01U; // predefined in RM0461 and RM0453
+		subghz_spi_setCmd(RADIO_SET_PACONFIG, RadioParam, 4);
 		break;
 	}
 }
@@ -104,17 +122,13 @@ void rfl_subghz_initTx(void){
 
 	// 6. Define RF Frequency
 	RadioParam[0] = 0x36U; //RF frequency - 868000000Hz
-	RadioParam[1] = 0x40U; //RF frequency - 868000000Hz
-	RadioParam[2] = 0x10U; //RF frequency - 868000000Hz
-	RadioParam[3] = 0x17U; //RF frequency - 868000000Hz
+	RadioParam[1] = 0x50U; //RF frequency - 868000000Hz
+	RadioParam[2] = 0x00U; //RF frequency - 868000000Hz
+	RadioParam[3] = 0x00U; //RF frequency - 868000000Hz
 	subghz_spi_setCmd(RADIO_SET_RFFREQUENCY, RadioParam, 4);
 
 	// 7. Set PA Config
-	RadioParam[0] = 0x04U; // PaDutyCycle
-	RadioParam[1] = 0x07U; // HpMax
-	RadioParam[2] = 0x00U; // HP PA selected
-	RadioParam[3] = 0x01U; // predefined in RM0461 and RM0453
-	subghz_spi_setCmd(RADIO_SET_PACONFIG, RadioParam, 4);
+	rfl_subghz_setPower(Tx22dBm);
 
 	// 8.  Set Tx Parameters
 	RadioParam[0] = 0x16U; // Power - +22dB
@@ -152,13 +166,8 @@ void rfl_subghz_initTx(void){
 	RadioParam[2] = 0x00U; // Timeout disabled
 
 	//send payload (hello world)
-	subghz_spi_setCmd(RADIO_SET_TX, RadioParam, 3);
+	subghz_spi_setCmd(RADIO_SET_TXCONTINUOUSWAVE, RadioParam, 3);
 
-	//send sin wave
-//	if (HAL_SUBGHZ_ExecSetCmd(&subghz_handler, RADIO_SET_TXCONTINUOUSWAVE, RadioParam, 0) != HAL_OK)
-//	{
-//		Subghz_Error_Handler();
-//	}
 	subghz_spi_getCmd(RADIO_GET_STATUS, buffer, 2);
 }
 

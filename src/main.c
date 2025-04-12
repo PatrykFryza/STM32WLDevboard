@@ -24,8 +24,8 @@
 #include "rfl_usart.h"
 #include "rfl_gpio.h"
 
-//#include "hal_based_subghz.h"
 #include "rfl_subghz.h"
+
 
 void Debbug_Toggle(uint32_t cycles){
     for(uint32_t i = 0; i < cycles; i++)
@@ -49,10 +49,12 @@ int main(void){
 
 	//Radio init
 	rfl_subghz_init();
+//	rfl_subghz_initTx();
+
 	rfl_subghz_initRx();
-	uint8_t payload[64] = "MEGA GIGA MASZT 5G\r\n";
-	rfl_subghz_transmit(payload);
-	Debbug_Toggle(10000000);
+//	uint8_t payload[64] = "MEGA GIGA MASZT 5G\r\n";
+//	rfl_subghz_transmit(payload);
+//	Debbug_Toggle(10000000);
 	rfl_subghz_setRxContinous();
 //	rfl_subghz_initTx();
 
